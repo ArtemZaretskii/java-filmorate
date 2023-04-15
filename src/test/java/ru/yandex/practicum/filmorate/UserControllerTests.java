@@ -75,7 +75,7 @@ public class UserControllerTests {
     @Test
     void addNewUserContainsIncorrectEmailIsException() {
         User user = new User(
-                "ivanov@mail.ru",
+                "ivanov.mail.ru",
                 "Ivan",
                 "Ivan Ivanov",
                 LocalDate.of(1999, 1, 1));
@@ -193,7 +193,7 @@ public class UserControllerTests {
     void updateUserContainsIncorrectEmailIsException() {
         User user = new User(
                 1,
-                "petrov@mail.ru",
+                "petrov.mail.ru",
                 "IvanPetrov",
                 "Ivan Petrov",
                 LocalDate.of(1999, 1, 1));

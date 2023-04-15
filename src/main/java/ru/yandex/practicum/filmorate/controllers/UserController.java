@@ -24,8 +24,8 @@ public class UserController {
         if (user.getId() != null) {
             logAndMessageException("id генерируется автоматически");
         }
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@ya.ru") && !user.getEmail().contains("@gmail.com")) {
-            logAndMessageException("Электронная почта не может быть пустой и должна содержать символ @ya.ru или @gmail.com");
+        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+            logAndMessageException("Электронная почта не может быть пустой и должна содержать символ @");
         }
         if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
             logAndMessageException("Логин не может быть пустым и содержать пробелы");
@@ -48,8 +48,8 @@ public class UserController {
         if (!users.containsKey(user.getId())) {
             logAndMessageException("Пользователь не найден");
         }
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@ya.ru") && !user.getEmail().contains("@gmail.com")) {
-            logAndMessageException("Электронная почта не может быть пустой и должна содержать символ @ya.ru или @gmail.com");
+        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+            logAndMessageException("Электронная почта не может быть пустой и должна содержать символ @");
         }
         if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
             logAndMessageException("Логин не может быть пустым и содержать пробелы");
