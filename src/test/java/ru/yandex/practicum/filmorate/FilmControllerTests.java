@@ -1,4 +1,3 @@
-/*
 package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -296,5 +295,5 @@ class FilmControllerTests {
         assertThrows(ValidationException.class, () -> filmController.update(updateFilm),
                 "Ошибка теста updateFilmWithWithZeroDurationIsException");
     }
+
 }
-*/

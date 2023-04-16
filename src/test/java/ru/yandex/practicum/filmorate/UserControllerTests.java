@@ -1,4 +1,3 @@
-/*
 package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,16 +15,16 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserControllerTests {
     private UserController userController;
 
-//    @BeforeEach
-//    void start() {
-//        userController = new UserController();
-//        User user = new User(
-//                "petrov@ya.ru",
-//                "Petrov",
-//                "Petr Petrov",
-//                LocalDate.of(2001, 9, 9));
-//        userController.add(user);
-//    }
+    @BeforeEach
+    void start() {
+        userController = new UserController();
+        User user = new User(
+                "petrov@ya.ru",
+                "Petrov",
+                "Petr Petrov",
+                LocalDate.of(2001, 9, 9));
+        userController.add(user);
+    }
 
     @Test
     void addNewUser() {
@@ -319,4 +318,3 @@ public class UserControllerTests {
         System.out.println(userController.getUsers());
     }
 }
-*/
