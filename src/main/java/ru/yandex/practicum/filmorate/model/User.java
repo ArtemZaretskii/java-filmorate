@@ -4,9 +4,8 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.PastOrPresent;
+import javax.validation.constraints.Past;
 import java.time.LocalDate;
 
 @Data
@@ -15,11 +14,10 @@ public class User {
 
     int id;
     @NotBlank
-    @Email
     String email;
     @NotBlank
     String login;
     String name;
-    @PastOrPresent
+    @Past
     LocalDate birthday;
 }

@@ -21,8 +21,17 @@ public class FilmController {
 
     @PostMapping
     public Film add(@Valid @RequestBody Film film) {
+        if (film.getName().isBlank() || film.getName() == null) {
+            logAndMessageException("Название не может быть пустым");
+        }
+        if (film.getDescription().length() > 200) {
+            logAndMessageException("Максимальная длина описания — 200 символов");
+        }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             logAndMessageException("Дата релиза — не раньше 28 декабря 1895 года");
+        }
+        if (film.getDuration() < 0) {
+            logAndMessageException("Продолжительность фильма должна быть положительной");
         }
         film.setId(id);
         films.put(id, film);
@@ -36,8 +45,17 @@ public class FilmController {
         if (!films.containsKey(film.getId())) {
             logAndMessageException("Фильм не найден");
         }
+        if (film.getName().isBlank()) {
+            logAndMessageException("Название не может быть пустым");
+        }
+        if (film.getDescription().length() > 200) {
+            logAndMessageException("Максимальная длина описания — 200 символов");
+        }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             logAndMessageException("Дата релиза — не раньше 28 декабря 1895 года");
+        }
+        if (film.getDuration() <= 0) {
+            logAndMessageException("Продолжительность фильма должна быть положительной");
         }
         films.put(film.getId(), film);
         log.info("Обновлен фильм: {}", film);
