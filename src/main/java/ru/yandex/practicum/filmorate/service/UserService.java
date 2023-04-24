@@ -27,4 +27,8 @@ public class UserService {
     public List<User> getUsers() {
         return userStorage.getUsers();
     }
+
+    public void addFriend(int id, int friendId) {
+        userStorage.addFriend(id, friendId);
+    }
 }
