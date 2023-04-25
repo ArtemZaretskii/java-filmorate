@@ -28,6 +28,10 @@ public class FilmService {
         return filmStorage.getFilms();
     }
 
+    public Film getFilmById(int id) {
+        return filmStorage.getFilmById(id);
+    }
+
     public void addLike(int userId, int filmId) {
         filmStorage.addLike(userId, filmId);
     }

@@ -28,6 +28,10 @@ public class UserService {
         return userStorage.getUsers();
     }
 
+    public User getUserById(int id) {
+        return userStorage.getUserById(id);
+    }
+
     public void addFriend(int id, int friendId) {
         userStorage.addFriend(id, friendId);
     }

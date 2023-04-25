@@ -67,6 +67,15 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public Film getFilmById(int id) {
+        if (!films.containsKey(id)) {
+            logAndMessageException("Фильм не найден");
+        }
+        log.info("Выполнен запрос на получение фильма по id");
+        return films.get(id);
+    }
+
+    @Override
     public void addLike(int userId, int filmId) {
         if (!films.containsKey(filmId)) {
             logAndMessageException("Фильм не найден");
@@ -102,6 +111,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getTop10Films(int count) {
+        log.info("Выполнен запрос на получение топ 10 фильмов");
         return getFilms().stream().sorted(Comparator.comparingInt(
                 film -> film.getLikes().size())).limit(count).collect(Collectors.toList());
     }

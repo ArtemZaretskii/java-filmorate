@@ -67,6 +67,15 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public User getUserById(int id) {
+        if (!users.containsKey(id)) {
+            logAndMessageException("Пользователь не найден");
+        }
+        log.info("Выполнен запрос на получения пользователя по id");
+        return users.get(id);
+    }
+
+    @Override
     public void addFriend(int id, int friendId) {
         if (!users.containsKey(id)) {
             logAndMessageException("Пользователь не найден");
