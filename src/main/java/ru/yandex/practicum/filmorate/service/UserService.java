@@ -32,8 +32,8 @@ public class UserService {
         userStorage.addFriend(id, friendId);
     }
 
-    public void removeFriend(int id, int friendId) {
-        userStorage.removeFriend(id, friendId);
+    public void deleteFriend(int id, int friendId) {
+        userStorage.deleteFriend(id, friendId);
     }
 
     public List<User> getFriends(int id) {

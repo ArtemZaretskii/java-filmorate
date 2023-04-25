@@ -82,7 +82,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void removeFriend(int id, int friendId) {
+    public void deleteFriend(int id, int friendId) {
         if (!users.containsKey(id)) {
             logAndMessageException("Пользователь 1 не найден");
         }
@@ -113,22 +113,22 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getListOfCommonFriends(int id1, int id2) {
-        if (!users.containsKey(id1)) {
+    public List<User> getListOfCommonFriends(int id, int otherId) {
+        if (!users.containsKey(id)) {
             logAndMessageException("Пользователь 1 не найден");
         }
-        if (!users.containsKey(id2)) {
+        if (!users.containsKey(otherId)) {
             logAndMessageException("Пользователь 2 не найден");
         }
         List<User> commonFriends = new ArrayList<>();
-        for (int user : users.get(id1).getFriends()) {
-            if (users.get(id2).getFriends().contains(user)) {
+        for (int user : users.get(id).getFriends()) {
+            if (users.get(otherId).getFriends().contains(user)) {
                 commonFriends.add(users.get(user));
             }
         }
         log.info("Количество общих зависимостей 'Друзья' у пользователей {} и {}: {}",
-                users.get(id1).getName(),
-                users.get(id2).getName(),
+                users.get(id).getName(),
+                users.get(otherId).getName(),
                 commonFriends.size());
         return commonFriends;
     }

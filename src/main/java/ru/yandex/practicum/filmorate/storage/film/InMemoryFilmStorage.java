@@ -4,18 +4,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
     private int id = 1;
+    private UserStorage userStorage;
 
     @Override
     public Film add(Film film) {
@@ -64,6 +64,46 @@ public class InMemoryFilmStorage implements FilmStorage {
     public List<Film> getFilms() {
         log.info("Выполнен запрос на получение списка фильмов");
         return new ArrayList<>(films.values());
+    }
+
+    @Override
+    public void addLike(int userId, int filmId) {
+        if (!films.containsKey(filmId)) {
+            logAndMessageException("Фильм не найден");
+        }
+        if (!userStorage.getUsers().contains(userId)) {
+            logAndMessageException("Пользователь не найден");
+        }
+        if (films.get(filmId).getLikes().contains(userId)) {
+            logAndMessageException("Пользователь уже поставил лайк этому фильму");
+        }
+        films.get(filmId).getLikes().add(userId);
+        log.info("Пользователь {} поставил лайк фильму {}",
+                userStorage.getUsers().get(userId).getName(),
+                films.get(filmId).getName());
+    }
+
+    @Override
+    public void deleteLike(int userId, int filmId) {
+        if (!films.containsKey(filmId)) {
+            logAndMessageException("Фильм не найден");
+        }
+        if (!userStorage.getUsers().contains(userId)) {
+            logAndMessageException("Пользователь не найден");
+        }
+        if (!films.get(filmId).getLikes().contains(userId)) {
+            logAndMessageException("Пользователь не ставил лайк этому фильму");
+        }
+        films.get(filmId).getLikes().remove(userId);
+        log.info("Пользователь {} удалил лайк фильму {}",
+                userStorage.getUsers().get(userId).getName(),
+                films.get(filmId).getName());
+    }
+
+    @Override
+    public List<Film> getTop10Films(int count) {
+        return getFilms().stream().sorted(Comparator.comparingInt(
+                film -> film.getLikes().size())).limit(count).collect(Collectors.toList());
     }
 
     private void logAndMessageException(String message) {
