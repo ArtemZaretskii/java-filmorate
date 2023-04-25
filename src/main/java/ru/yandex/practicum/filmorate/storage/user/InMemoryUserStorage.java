@@ -66,6 +66,73 @@ public class InMemoryUserStorage implements UserStorage {
         return new ArrayList<>(users.values());
     }
 
+    @Override
+    public void addFriend(int id, int friendId) {
+        if (!users.containsKey(id)) {
+            logAndMessageException("Пользователь не найден");
+        }
+        if (!users.containsKey(friendId)) {
+            logAndMessageException("Пользователь не найден");
+        }
+        users.get(id).getFriends().add(friendId);
+        users.get(friendId).getFriends().add(id);
+        log.info("Создана зависимость 'Друзья' между пользователями {} и {}",
+                users.get(id).getName(),
+                users.get(friendId).getName());
+    }
+
+    @Override
+    public void removeFriend(int id, int friendId) {
+        if (!users.containsKey(id)) {
+            logAndMessageException("Пользователь 1 не найден");
+        }
+        if (!users.containsKey(friendId)) {
+            logAndMessageException("Пользователь 2 не найден");
+        }
+        users.get(id).getFriends().remove(friendId);
+        users.get(friendId).getFriends().remove(id);
+        log.info("Удалена зависимость 'Друзья' между пользователями {} и {}",
+                users.get(id).getName(),
+                users.get(friendId).getName());
+    }
+
+    @Override
+    public List<User> getFriends(int id) {
+        if (!users.containsKey(id)) {
+            logAndMessageException("Пользователь не найден");
+        }
+        List<User> friends = new ArrayList<>();
+        List<Integer> friendsId = new ArrayList<>(users.get(id).getFriends());
+        for (int friendsIds : friendsId) {
+            friends.add(users.get(friendsIds));
+        }
+        log.info("Количество зависимостей 'Друзья' у пользователя {} = {}",
+                users.get(id).getName(),
+                users.get(id).getFriends().size());
+        return friends;
+    }
+
+    @Override
+    public List<User> getListOfCommonFriends(int id1, int id2) {
+        if (!users.containsKey(id1)) {
+            logAndMessageException("Пользователь 1 не найден");
+        }
+        if (!users.containsKey(id2)) {
+            logAndMessageException("Пользователь 2 не найден");
+        }
+        List<User> commonFriends = new ArrayList<>();
+        for (int user : users.get(id1).getFriends()) {
+            if (users.get(id2).getFriends().contains(user)) {
+                commonFriends.add(users.get(user));
+            }
+        }
+        log.info("Количество общих зависимостей 'Друзья' у пользователей {} и {}: {}",
+                users.get(id1).getName(),
+                users.get(id2).getName(),
+                commonFriends.size());
+        return commonFriends;
+    }
+
     private void logAndMessageException(String message) {
         log.warn(message);
         throw new ValidationException(message);
