@@ -24,3 +24,4 @@ public class User {
     LocalDate birthday;
     Set<Integer> friends = new HashSet<>();
 }
+

@@ -27,5 +27,5 @@ public class ErrorHandler {
     public Map<String, String> handleThrowableException(final Throwable e) {
         return Map.of("error: ", e.getMessage());
     }
-
 }
+

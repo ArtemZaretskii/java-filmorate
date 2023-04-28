@@ -19,3 +19,4 @@ public interface FilmStorage {
 
     List<Film> getTop10Films(int count);
 }
+

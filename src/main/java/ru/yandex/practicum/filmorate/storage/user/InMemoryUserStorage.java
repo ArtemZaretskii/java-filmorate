@@ -153,3 +153,4 @@ public class InMemoryUserStorage implements UserStorage {
         throw new ObjectNotFoundException(message);
     }
 }
+
