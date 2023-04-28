@@ -1,35 +1,46 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
+    private final UserStorage userStorage;
     private int id = 1;
-    private UserStorage userStorage;
+
+    @Autowired
+    public InMemoryFilmStorage(UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
     @Override
     public Film add(Film film) {
         if (film.getName().isBlank() || film.getName() == null) {
-            logAndMessageException("Название не может быть пустым");
+            logAndMessageValidationException("Название не может быть пустым");
         }
         if (film.getDescription().length() > 200) {
-            logAndMessageException("Максимальная длина описания — 200 символов");
+            logAndMessageValidationException("Максимальная длина описания — 200 символов");
         }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            logAndMessageException("Дата релиза — не раньше 28 декабря 1895 года");
+            logAndMessageValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
         if (film.getDuration() < 0) {
-            logAndMessageException("Продолжительность фильма должна быть положительной");
+            logAndMessageValidationException("Продолжительность фильма должна быть положительной");
         }
         film.setId(id);
         films.put(id, film);
@@ -41,19 +52,19 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film update(Film film) {
         if (!films.containsKey(film.getId())) {
-            logAndMessageException("Фильм не найден");
+            logAndMessageObjectNotFoundException("Фильм не найден");
         }
         if (film.getName().isBlank()) {
-            logAndMessageException("Название не может быть пустым");
+            logAndMessageValidationException("Название не может быть пустым");
         }
         if (film.getDescription().length() > 200) {
-            logAndMessageException("Максимальная длина описания — 200 символов");
+            logAndMessageValidationException("Максимальная длина описания — 200 символов");
         }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            logAndMessageException("Дата релиза — не раньше 28 декабря 1895 года");
+            logAndMessageValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
         if (film.getDuration() <= 0) {
-            logAndMessageException("Продолжительность фильма должна быть положительной");
+            logAndMessageValidationException("Продолжительность фильма должна быть положительной");
         }
         films.put(film.getId(), film);
         log.info("Обновлен фильм: {}", film);
@@ -69,55 +80,59 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film getFilmById(int id) {
         if (!films.containsKey(id)) {
-            logAndMessageException("Фильм не найден");
+            logAndMessageObjectNotFoundException("Фильм не найден");
         }
         log.info("Выполнен запрос на получение фильма по id");
         return films.get(id);
     }
 
     @Override
-    public void addLike(int userId, int filmId) {
+    public void addLike(int filmId, int userId) {
         if (!films.containsKey(filmId)) {
-            logAndMessageException("Фильм не найден");
+            logAndMessageObjectNotFoundException("Фильм не найден");
         }
-        if (!userStorage.getUsers().contains(userId)) {
-            logAndMessageException("Пользователь не найден");
-        }
+        User user = userStorage.getUserById(userId);
         if (films.get(filmId).getLikes().contains(userId)) {
-            logAndMessageException("Пользователь уже поставил лайк этому фильму");
+            logAndMessageValidationException("Пользователь уже поставил лайк этому фильму");
         }
         films.get(filmId).getLikes().add(userId);
         log.info("Пользователь {} поставил лайк фильму {}",
-                userStorage.getUsers().get(userId).getName(),
+                user.getName(),
                 films.get(filmId).getName());
     }
 
     @Override
-    public void deleteLike(int userId, int filmId) {
+    public void deleteLike(int filmId, int userId) {
         if (!films.containsKey(filmId)) {
-            logAndMessageException("Фильм не найден");
+            logAndMessageObjectNotFoundException("Фильм не найден");
         }
-        if (!userStorage.getUsers().contains(userId)) {
-            logAndMessageException("Пользователь не найден");
-        }
+        User user = userStorage.getUserById(userId);
         if (!films.get(filmId).getLikes().contains(userId)) {
-            logAndMessageException("Пользователь не ставил лайк этому фильму");
+            logAndMessageValidationException("Пользователь не ставил лайк этому фильму");
         }
         films.get(filmId).getLikes().remove(userId);
         log.info("Пользователь {} удалил лайк фильму {}",
-                userStorage.getUsers().get(userId).getName(),
+                user.getName(),
                 films.get(filmId).getName());
     }
 
     @Override
     public List<Film> getTop10Films(int count) {
         log.info("Выполнен запрос на получение топ 10 фильмов");
-        return getFilms().stream().sorted(Comparator.comparingInt(
-                film -> film.getLikes().size())).limit(count).collect(Collectors.toList());
+        return getFilms().stream().sorted((i0, i1) -> {
+            int comp = Integer.compare(i0.getLikes().size(), i1.getLikes().size());
+            return comp * -1;
+        }).limit(count).collect(Collectors.toList());
     }
 
-    private void logAndMessageException(String message) {
+
+    private void logAndMessageValidationException(String message) {
         log.warn(message);
         throw new ValidationException(message);
+    }
+
+    private void logAndMessageObjectNotFoundException(String message) {
+        log.warn(message);
+        throw new ObjectNotFoundException(message);
     }
 }

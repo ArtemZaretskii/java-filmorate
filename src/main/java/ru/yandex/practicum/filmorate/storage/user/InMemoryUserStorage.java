@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -20,16 +21,16 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User add(User user) {
         if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            logAndMessageException("Электронная почта не может быть пустой и должна содержать символ @");
+            logAndMessageValidationException("Электронная почта не может быть пустой и должна содержать символ @");
         }
         if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            logAndMessageException("Логин не может содержать пробелы");
+            logAndMessageValidationException("Логин не может содержать пробелы");
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            logAndMessageException("Дата рождения не может быть в будущем");
+            logAndMessageValidationException("Дата рождения не может быть в будущем");
         }
         user.setId(id);
         users.put(id, user);
@@ -41,19 +42,19 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User update(User user) {
         if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            logAndMessageException("Электронная почта не может быть пустой и должна содержать символ @");
+            logAndMessageValidationException("Электронная почта не может быть пустой и должна содержать символ @");
         }
         if (!users.containsKey(user.getId())) {
-            logAndMessageException("Пользователь не найден");
+            logAndMessageObjectNotFoundException("Пользователь не найден");
         }
         if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            logAndMessageException("Логин не может содержать пробелы");
+            logAndMessageValidationException("Логин не может содержать пробелы");
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            logAndMessageException("Дата рождения не может быть в будущем");
+            logAndMessageValidationException("Дата рождения не может быть в будущем");
         }
         users.put(user.getId(), user);
         log.info("Обновлен пользователь: {}", user);
@@ -69,7 +70,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User getUserById(int id) {
         if (!users.containsKey(id)) {
-            logAndMessageException("Пользователь не найден");
+            logAndMessageObjectNotFoundException("Пользователь не найден");
         }
         log.info("Выполнен запрос на получения пользователя по id");
         return users.get(id);
@@ -78,10 +79,10 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void addFriend(int id, int friendId) {
         if (!users.containsKey(id)) {
-            logAndMessageException("Пользователь не найден");
+            logAndMessageObjectNotFoundException("Пользователь не найден");
         }
         if (!users.containsKey(friendId)) {
-            logAndMessageException("Пользователь не найден");
+            logAndMessageObjectNotFoundException("Пользователь не найден");
         }
         users.get(id).getFriends().add(friendId);
         users.get(friendId).getFriends().add(id);
@@ -93,10 +94,10 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void deleteFriend(int id, int friendId) {
         if (!users.containsKey(id)) {
-            logAndMessageException("Пользователь 1 не найден");
+            logAndMessageObjectNotFoundException("Пользователь 1 не найден");
         }
         if (!users.containsKey(friendId)) {
-            logAndMessageException("Пользователь 2 не найден");
+            logAndMessageObjectNotFoundException("Пользователь 2 не найден");
         }
         users.get(id).getFriends().remove(friendId);
         users.get(friendId).getFriends().remove(id);
@@ -108,7 +109,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public List<User> getFriends(int id) {
         if (!users.containsKey(id)) {
-            logAndMessageException("Пользователь не найден");
+            logAndMessageObjectNotFoundException("Пользователь не найден");
         }
         List<User> friends = new ArrayList<>();
         List<Integer> friendsId = new ArrayList<>(users.get(id).getFriends());
@@ -124,10 +125,10 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public List<User> getListOfCommonFriends(int id, int otherId) {
         if (!users.containsKey(id)) {
-            logAndMessageException("Пользователь 1 не найден");
+            logAndMessageObjectNotFoundException("Пользователь 1 не найден");
         }
         if (!users.containsKey(otherId)) {
-            logAndMessageException("Пользователь 2 не найден");
+            logAndMessageObjectNotFoundException("Пользователь 2 не найден");
         }
         List<User> commonFriends = new ArrayList<>();
         for (int user : users.get(id).getFriends()) {
@@ -142,8 +143,13 @@ public class InMemoryUserStorage implements UserStorage {
         return commonFriends;
     }
 
-    private void logAndMessageException(String message) {
+    private void logAndMessageValidationException(String message) {
         log.warn(message);
         throw new ValidationException(message);
+    }
+
+    private void logAndMessageObjectNotFoundException(String message) {
+        log.warn(message);
+        throw new ObjectNotFoundException(message);
     }
 }

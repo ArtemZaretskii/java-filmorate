@@ -1,18 +1,21 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class FilmService {
     private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
     }
 
@@ -32,12 +35,12 @@ public class FilmService {
         return filmStorage.getFilmById(id);
     }
 
-    public void addLike(int userId, int filmId) {
-        filmStorage.addLike(userId, filmId);
+    public void addLike(int filmId, int userId) {
+        filmStorage.addLike(filmId, userId);
     }
 
-    public void deleteLike(int userId, int filmId) {
-        filmStorage.deleteLike(userId, filmId);
+    public void deleteLike(int filmId, int userId) {
+        filmStorage.deleteLike(filmId, userId);
     }
 
     public List<Film> getTop10Films(int count) {
