@@ -3,14 +3,13 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ObjectNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -20,18 +19,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User add(User user) {
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            logAndMessageValidationException("Электронная почта не может быть пустой и должна содержать символ @");
-        }
-        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            logAndMessageValidationException("Логин не может содержать пробелы");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            logAndMessageValidationException("Дата рождения не может быть в будущем");
-        }
         user.setId(id);
         users.put(id, user);
         id++;
@@ -41,20 +28,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User user) {
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            logAndMessageValidationException("Электронная почта не может быть пустой и должна содержать символ @");
-        }
         if (!users.containsKey(user.getId())) {
             logAndMessageObjectNotFoundException("Пользователь не найден");
-        }
-        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            logAndMessageValidationException("Логин не может содержать пробелы");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            logAndMessageValidationException("Дата рождения не может быть в будущем");
         }
         users.put(user.getId(), user);
         log.info("Обновлен пользователь: {}", user);
@@ -130,22 +105,15 @@ public class InMemoryUserStorage implements UserStorage {
         if (!users.containsKey(otherId)) {
             logAndMessageObjectNotFoundException("Пользователь 2 не найден");
         }
-        List<User> commonFriends = new ArrayList<>();
-        for (int user : users.get(id).getFriends()) {
-            if (users.get(otherId).getFriends().contains(user)) {
-                commonFriends.add(users.get(user));
-            }
-        }
+        List<User> commonFriends = new ArrayList<>(getFriends(id).stream()
+                .distinct()
+                .filter(getFriends(otherId)::contains)
+                .collect(Collectors.toList()));
         log.info("Количество общих зависимостей 'Друзья' у пользователей {} и {}: {}",
                 users.get(id).getName(),
                 users.get(otherId).getName(),
                 commonFriends.size());
         return commonFriends;
-    }
-
-    private void logAndMessageValidationException(String message) {
-        log.warn(message);
-        throw new ValidationException(message);
     }
 
     private void logAndMessageObjectNotFoundException(String message) {

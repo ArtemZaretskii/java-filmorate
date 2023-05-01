@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,18 +29,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film add(Film film) {
-        if (film.getName().isBlank() || film.getName() == null) {
-            logAndMessageValidationException("Название не может быть пустым");
-        }
-        if (film.getDescription().length() > 200) {
-            logAndMessageValidationException("Максимальная длина описания — 200 символов");
-        }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            logAndMessageValidationException("Дата релиза — не раньше 28 декабря 1895 года");
-        }
-        if (film.getDuration() < 0) {
-            logAndMessageValidationException("Продолжительность фильма должна быть положительной");
-        }
         film.setId(id);
         films.put(id, film);
         id++;
@@ -53,18 +40,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film update(Film film) {
         if (!films.containsKey(film.getId())) {
             logAndMessageObjectNotFoundException("Фильм не найден");
-        }
-        if (film.getName().isBlank()) {
-            logAndMessageValidationException("Название не может быть пустым");
-        }
-        if (film.getDescription().length() > 200) {
-            logAndMessageValidationException("Максимальная длина описания — 200 символов");
-        }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            logAndMessageValidationException("Дата релиза — не раньше 28 декабря 1895 года");
-        }
-        if (film.getDuration() <= 0) {
-            logAndMessageValidationException("Продолжительность фильма должна быть положительной");
         }
         films.put(film.getId(), film);
         log.info("Обновлен фильм: {}", film);
