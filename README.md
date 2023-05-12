@@ -1,29 +1,59 @@
-# java-filmorate
-Template repository for Filmorate project.
+### java-filmorate
+Схема базы данных:
+![](db_map.jpg)
 
-Приветствую Артем! Спасибо!
+#### Примеры запросов:
 
-Насчет комментариев в Pull Requests знаю, но пока не видел.
+* Получение списка пользователей:
+```
+SELECT *
+FROM users
+```
 
-Извиняюсь за бардак.
-Тесты привел в нормальный вид, остальное вернул как было, а то 
-по советам, как обойти ошибки постмана и поискам в инете уже примерно в таком виде код был:
- 
-    @Data
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    @AllArgsConstructor
+* Получение одного пользователя по id (?? - id пользователя):
+```
+SELECT *
+FROM users
+WHERE user_id = ??;
+```
 
-    public class User {
-    int id;
-    @NotBlank(message = "Email не может быть пустым")
-    @Email(message = "Указан некорректный Email")
-    String email;
-    @NotBlank(message = "Login не может быть пустым")
-    String login;
-    String name;
-    @NotNull(message = "Дата рождения не может быть пустой")
-    @Past(message = "Дата рождения не может быть в будущем")
-    LocalDate birthday;
-}
+* Получение друзей пользователя (n - id пользователя):
+```
+SELECT friend_id
+FROM friends
+WHERE user_id = n;
+```
 
-Вот только пока не понял, как обложить это тестами.
+* Получение списка общих друзей с другим пользователем:
+```
+SSELECT friend_id
+FROM friends
+WHERE user_id = n
+AND user_id = m
+GROUP BY friend_id;
+```
+
+* Получение списка всех фильмов:
+```
+SELECT *
+FROM films
+```
+
+* Получение одного фильма (n - id фильма):
+```
+SELECT *
+FROM films
+WHERE film_id = n;
+```
+
+* Получение ТОП-10 фильмов:
+```
+SELECT name
+FROM films
+WHERE film_id
+   in (SELECT film_id
+      FROM like
+      GROUP BY film_id
+      ORDER BY COUNT(film_id) DESC
+      LIMIT 10);
+```

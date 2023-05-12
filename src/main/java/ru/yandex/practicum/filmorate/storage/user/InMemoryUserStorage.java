@@ -5,10 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,9 +34,9 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getUsers() {
+    public Map<Integer, User> getUsers() {
         log.info("Выполнен запрос на получение списка пользователей");
-        return new ArrayList<>(users.values());
+        return users;
     }
 
     @Override
@@ -52,7 +49,14 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void addFriend(int id, int friendId) {
+    public Integer deleteUser(int id) {
+        users.remove(id);
+        log.info("Удален пользователь {}", id);
+        return id;
+    }
+
+    @Override
+    public User addFriend(int id, int friendId) {
         if (!users.containsKey(id)) {
             logAndMessageObjectNotFoundException("Пользователь не найден");
         }
@@ -64,10 +68,11 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("Создана зависимость 'Друзья' между пользователями {} и {}",
                 users.get(id).getName(),
                 users.get(friendId).getName());
+        return getUserById(friendId);
     }
 
     @Override
-    public void deleteFriend(int id, int friendId) {
+    public Integer deleteFriend(int id, int friendId) {
         if (!users.containsKey(id)) {
             logAndMessageObjectNotFoundException("Пользователь 1 не найден");
         }
@@ -79,15 +84,16 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("Удалена зависимость 'Друзья' между пользователями {} и {}",
                 users.get(id).getName(),
                 users.get(friendId).getName());
+        return null;
     }
 
     @Override
-    public List<User> getFriends(int id) {
+    public Collection<User> getFriends(int id) {
         if (!users.containsKey(id)) {
             logAndMessageObjectNotFoundException("Пользователь не найден");
         }
         List<User> friends = new ArrayList<>();
-        List<Integer> friendsId = new ArrayList<>(users.get(id).getFriends());
+        Set<Integer> friendsId = users.get(id).getFriends();
         for (int friendsIds : friendsId) {
             friends.add(users.get(friendsIds));
         }
@@ -98,7 +104,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getListOfCommonFriends(int id, int otherId) {
+    public Collection<User> getListOfCommonFriends(int id, int otherId) {
         if (!users.containsKey(id)) {
             logAndMessageObjectNotFoundException("Пользователь 1 не найден");
         }

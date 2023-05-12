@@ -2,11 +2,13 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
 
 import static ru.yandex.practicum.filmorate.service.ValidationService.validateUser;
 
@@ -14,6 +16,7 @@ import static ru.yandex.practicum.filmorate.service.ValidationService.validateUs
 @Slf4j
 @RequiredArgsConstructor
 public class UserService {
+    @Qualifier("userDbStorage")
     private final UserStorage userStorage;
 
     public User add(User user) {
@@ -26,7 +29,7 @@ public class UserService {
         return userStorage.update(user);
     }
 
-    public List<User> getUsers() {
+    public Map<Integer, User> getUsers() {
         return userStorage.getUsers();
     }
 
@@ -34,20 +37,24 @@ public class UserService {
         return userStorage.getUserById(id);
     }
 
-    public void addFriend(int id, int friendId) {
-        userStorage.addFriend(id, friendId);
+    public Integer deleteUser(Integer id) {
+        return userStorage.deleteUser(id);
     }
 
-    public void deleteFriend(int id, int friendId) {
-        userStorage.deleteFriend(id, friendId);
+    public User addFriend(int id, int friendId) {
+        return userStorage.addFriend(id, friendId);
     }
 
-    public List<User> getFriends(int id) {
+    public Integer deleteFriend(int id, int friendId) {
+        return userStorage.deleteFriend(id, friendId);
+    }
+
+    public Collection<User> getFriends(int id) {
         return userStorage.getFriends(id);
     }
 
-    public List<User> getListOfCommonFriends(int id1, int id2) {
-        return userStorage.getListOfCommonFriends(id1, id2);
+    public Collection<User> getListOfCommonFriends(int id, int otherId) {
+        return userStorage.getListOfCommonFriends(id, otherId);
     }
 }
 
