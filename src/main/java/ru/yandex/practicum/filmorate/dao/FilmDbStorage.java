@@ -237,6 +237,7 @@ public class FilmDbStorage implements FilmStorage {
             Integer filmId;
             Integer userId;
         }
+
         StringJoiner parameter = new StringJoiner(",");
         films.keySet().forEach(id -> parameter.add(Long.toString(id)));
 
