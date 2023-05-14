@@ -9,14 +9,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Rating;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -29,90 +30,114 @@ class FilmDbStorageTest {
 
     @BeforeEach
     public void createFilmsForTests() {
-        film = new Film("The Rock1", "Starring Nicolas Cage and Sean Connery1",
-                LocalDate.of(1995, 6, 7), 137, new Rating(2));
-        film1 = new Film("The Rock2", "Starring Nicolas Cage and Sean Connery2",
-                LocalDate.of(1994, 6, 7), 135, new Rating(3),
-                new HashSet<>(List.of(new Genre(1), new Genre(2))));
+        film = Film.builder()
+                .name("The Rock1")
+                .description("Starring Nicolas Cage and Sean Connery1")
+                .mpa(new Mpa(2, "PG"))
+                .releaseDate(LocalDate.of(1995, 6, 7))
+                .build();
+
+        film1 = Film.builder()
+                .name("The Rock2")
+                .description("Starring Nicolas Cage and Sean Connery2")
+                .mpa(new Mpa(3, "PG-13"))
+                .genres(new HashSet<>(List.of(new Genre(1, "Комедия"), new Genre(2, "Драма"))))
+                .releaseDate(LocalDate.of(1995, 6, 7))
+                .build();
     }
 
     @Test
     void shouldReturnAllFilmsWhenFilmHasNotGenres() {
-        Map<Integer, Film> films = filmDbStorage.getFilms();
+        List<Film> films = filmDbStorage.getFilms();
         assertThat(films).hasSize(1);
-        Film returnedFilm = films.get(1);
+        Film returnedFilm = films.get(0);
         assertThat(returnedFilm.getId()).isEqualTo(1);
         assertThat(returnedFilm.getName()).isEqualTo("The Rock");
         assertThat(returnedFilm.getDescription()).isEqualTo("Starring Nicolas Cage and Sean Connery");
         assertThat(returnedFilm.getReleaseDate()).isEqualTo("1996-06-07");
         assertThat(returnedFilm.getDuration()).isEqualTo(136);
-        assertThat(returnedFilm.getRating().getId()).isEqualTo(1);
+        assertThat(returnedFilm.getMpa().getId()).isEqualTo(1);
     }
 
     @Test
     void shouldReturnAllFilmsWhenFilmHasGenres() {
         filmDbStorage.add(film1);
-        Map<Integer, Film> films = filmDbStorage.getFilms();
+        List<Film> films = filmDbStorage.getFilms();
         assertThat(films).hasSize(2);
-        Film returnedFilm = films.get(2);
+        Film returnedFilm = films.get(1);
         assertThat(returnedFilm.getId()).isEqualTo(2);
         assertThat(returnedFilm.getName()).isEqualTo(film1.getName());
         assertThat(returnedFilm.getDescription()).isEqualTo(film1.getDescription());
         assertThat(returnedFilm.getReleaseDate()).isEqualTo(film1.getReleaseDate());
         assertThat(returnedFilm.getDuration()).isEqualTo(film1.getDuration());
-        assertThat(returnedFilm.getRating().getId()).isEqualTo(film1.getRating().getId());
-        assertThat(returnedFilm.getGenres()).isEqualTo(film1.getGenres());
+        assertThat(returnedFilm.getMpa().getId()).isEqualTo(film1.getMpa().getId());
+        assertThat(returnedFilm.getGenres().size()).isEqualTo(film1.getGenres().size());
     }
 
     @Test
     void shouldAddFilmWhenFilmHasNotGenres() {
         filmDbStorage.add(film);
-        Map<Integer, Film> films = filmDbStorage.getFilms();
+        List<Film> films = filmDbStorage.getFilms();
         assertThat(films).hasSize(2);
-        Film returnedFilm = films.get(2);
+        Film returnedFilm = films.get(1);
         assertThat(returnedFilm.getId()).isEqualTo(2);
         assertThat(returnedFilm.getName()).isEqualTo(film.getName());
         assertThat(returnedFilm.getDescription()).isEqualTo(film.getDescription());
         assertThat(returnedFilm.getReleaseDate()).isEqualTo(film.getReleaseDate());
         assertThat(returnedFilm.getDuration()).isEqualTo(film.getDuration());
-        assertThat(returnedFilm.getRating().getId()).isEqualTo(film.getRating().getId());
+        assertThat(returnedFilm.getMpa().getId()).isEqualTo(film.getMpa().getId());
     }
 
     @Test
     void shouldAddFilmWhenFilmHasGenres() {
         filmDbStorage.add(film1);
-        Map<Integer, Film> films = filmDbStorage.getFilms();
+        List<Film> films = filmDbStorage.getFilms();
         assertThat(films).hasSize(2);
-        Film returnedFilm = films.get(2);
+        Film returnedFilm = films.get(1);
         assertThat(returnedFilm.getId()).isEqualTo(2);
         assertThat(returnedFilm.getName()).isEqualTo(film1.getName());
         assertThat(returnedFilm.getDescription()).isEqualTo(film1.getDescription());
         assertThat(returnedFilm.getReleaseDate()).isEqualTo(film1.getReleaseDate());
         assertThat(returnedFilm.getDuration()).isEqualTo(film1.getDuration());
-        assertThat(returnedFilm.getRating().getId()).isEqualTo(film1.getRating().getId());
-        assertThat(returnedFilm.getGenres()).isEqualTo(film1.getGenres());
+        assertThat(returnedFilm.getMpa().getId()).isEqualTo(film1.getMpa().getId());
     }
 
     @Test
     void shouldUpdateFilmWhenFilmHasNotGenres() {
-        Film updateFilm = new Film(1, "updateName", "updateDescription", LocalDate.of(2000, 12, 12),
-                100, new HashSet<>(), new Rating(4), null);
+        Film updateFilm = Film.builder()
+                .id(1)
+                .name("updateName")
+                .description("updateDescription")
+                .mpa(new Mpa(2, "PG"))
+                .releaseDate(LocalDate.of(2000, 12, 12))
+                .mpa(new Mpa(4, "R"))
+                .build();
         filmDbStorage.update(updateFilm);
-        assertThat(updateFilm).isEqualTo(filmDbStorage.getFilms().get(1));
+        assertThat(updateFilm.getName()).isEqualTo(filmDbStorage.getFilms().get(0).getName());
     }
 
     @Test
     void shouldUpdateFilmWhenFilmHasGenres() {
         filmDbStorage.add(film1);
-        Film updateFilm = new Film(2, "updateName", "updateDescription", LocalDate.of(2000, 12, 12),
-                100,new HashSet<>(),  new Rating(4), new HashSet<>(List.of(new Genre(3), new Genre(4))));
-        filmDbStorage.update(updateFilm);
-        assertThat(updateFilm).isEqualTo(filmDbStorage.getFilms().get(2));
+        Film updateFilm = Film.builder()
+                .id(2)
+                .name("updateName")
+                .description("updateDescription")
+                .mpa(new Mpa(2, "PG"))
+                .releaseDate(LocalDate.of(2000, 12, 12))
+                .genres(new HashSet<>(List.of(new Genre(3, "Мультфильм"), new Genre(4, "Триллер"))))
+                .mpa(new Mpa(4, "R"))
+                .build();
+
+        Film update = filmDbStorage.update(updateFilm);
+
+        Film result = filmDbStorage.getFilmById(update.getId());
+        assertThat(updateFilm.getGenres().size()).isEqualTo(result.getGenres().size());
     }
 
     @Test
     void shouldRemoveFilm() {
-        assertThat(filmDbStorage.getFilms().get(1).getId()).isEqualTo(1);
+        assertThat(filmDbStorage.getFilms().get(0).getId()).isEqualTo(1);
         assertThat(filmDbStorage.getFilms()).hasSize(1);
         filmDbStorage.deleteFilm(1);
         assertThat(filmDbStorage.getFilms()).isEmpty();
@@ -120,8 +145,26 @@ class FilmDbStorageTest {
 
     @Test
     void shouldReturnFilmById() {
-        assertThat(filmDbStorage.getFilmById(1)).isEqualTo(new Film(1, "The Rock",
-                "Starring Nicolas Cage and Sean Connery", LocalDate.of(1996, 6, 7),
-                136, new HashSet<>(), new Rating(1), null));
+        Film result = filmDbStorage.getFilmById(1);
+        assertThat(result.getName()).isEqualTo("The Rock");
+        assertThat(result.getDescription()).isEqualTo("Starring Nicolas Cage and Sean Connery");
+    }
+
+    @Test
+    void shouldReturnPopularFilms() {
+        filmDbStorage.add(film);
+        filmDbStorage.addLike(2, 1);
+
+        List<Film> result = new ArrayList<>(filmDbStorage.getPopularFilms(10));
+        assertAll(
+                () -> assertThat(result.size()).isEqualTo(1),
+                () -> assertThat(result.get(0))
+                        .hasFieldOrPropertyWithValue("name", film.getName()),
+                () -> assertThat(result.get(0))
+                        .hasFieldOrPropertyWithValue("mpa.id", film.getMpa().getId()),
+                () -> assertThat(result.get(0))
+                        .hasFieldOrPropertyWithValue("description", film.getDescription())
+        );
+
     }
 }

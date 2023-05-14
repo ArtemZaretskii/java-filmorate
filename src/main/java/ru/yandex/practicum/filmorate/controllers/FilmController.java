@@ -28,7 +28,7 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> getFilms() {
-        return filmService.getFilms().values();
+        return filmService.getFilms();
     }
 
     @DeleteMapping("/{id}")
@@ -53,7 +53,7 @@ public class FilmController {
 
     @GetMapping("/popular")
     public Collection<Film> getTop10Films(@RequestParam(value = "count", defaultValue = "10", required = false) int count) {
-        return filmService.getTop10Films(count);
+        return filmService.getPopularFilms(count);
     }
 }
 

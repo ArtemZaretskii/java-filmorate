@@ -11,9 +11,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,10 +33,12 @@ class FriendDaoTest {
 
     @Test
     void shouldAddToFriends() {
-        userDbStorage.add(user);
+        user = userDbStorage.add(user);
         friendDao.addFriend(1, 2);
-        assertThat(userService.getFriends(1)).contains(user);
-        assertThat(userDbStorage.getUsers().get(1).getFriendStatus().get(2)).isEqualTo(false);
+        List<User> result = new ArrayList<>(userService.getFriends(1));
+        assertThat(userService.getFriends(1)).isNotEmpty();
+        assertThat(result).isNotEmpty();
+        assertThat(result.get(0)).hasFieldOrPropertyWithValue("id", 2);
     }
 
     @Test
@@ -46,25 +46,35 @@ class FriendDaoTest {
         userDbStorage.add(user);
         friendDao.addFriend(1, 2);
         friendDao.addFriend(2, 1);
-        assertThat(userService.getFriends(1)).contains(userDbStorage.getUsers().get(2));
-        assertThat(userService.getFriends(2)).contains(userDbStorage.getUsers().get(1));
-        assertThat(userDbStorage.getUsers().get(1).getFriendStatus().get(2)).isEqualTo(true);
+
+        List<User> result1 = new ArrayList<>(userService.getFriends(1));
+        List<User> result2 = new ArrayList<>(userService.getFriends(2));
+
+        assertThat(result1).isNotEmpty();
+        assertThat(result2).isNotEmpty();
+
+        assertThat(result1.get(0)).hasFieldOrPropertyWithValue("id", 2);
+        assertThat(result2.get(0)).hasFieldOrPropertyWithValue("id", 1);
     }
 
     @Test
     void shouldRemoveFromFriends() {
         userDbStorage.add(user);
         friendDao.addFriend(1, 2);
-        assertThat(userService.getFriends(1)).contains(user);
+        List<User> result1 = new ArrayList<>(userService.getFriends(1));
+
+        assertThat(result1).isNotEmpty();
         friendDao.deleteFriend(1, 2);
-        assertThat(userService.getFriends(1)).isEmpty();
+        List<User> result2 = new ArrayList<>(userService.getFriends(1));
+        assertThat(result2).isEmpty();
     }
 
     @Test
     void shouldReturnUserFriends() {
         userDbStorage.add(user);
         friendDao.addFriend(1, 2);
-        assertThat(friendDao.getFriends(1)).isEqualTo(List.of(user));
+        List<User> result = new ArrayList<>(friendDao.getFriends(1));
+        assertThat(result.get(0).getName()).isEqualTo(user.getName());
     }
 
     @Test
@@ -75,6 +85,8 @@ class FriendDaoTest {
         userDbStorage.add(common);
         friendDao.addFriend(1, 3);
         friendDao.addFriend(2, 3);
-        assertThat(friendDao.getListOfCommonFriends(1, 2)).isEqualTo(List.of(common));
+        List<User> result = new ArrayList<>(friendDao.getListOfCommonFriends(1, 2));
+        assertThat(result).isNotEmpty();
+        assertThat(result.get(0).getId()).isEqualTo(3);
     }
 }

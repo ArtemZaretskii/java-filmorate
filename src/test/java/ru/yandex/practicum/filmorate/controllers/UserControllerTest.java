@@ -33,24 +33,69 @@ class UserControllerTest {
     }
 
     private void createUsersForTests() {
-        user = new User(1, "salvador@mail.ru", "chico", "Poco",
-                LocalDate.of(1990, 10, 6));
-        user1 = new User(1, "", "chico1", "Poco1",
-                LocalDate.of(1991, 10, 6));
-        user2 = new User(1, "salvador.ru", "chico2", "Poco2",
-                LocalDate.of(1992, 10, 6));
-        user3 = new User(1, "salvador@t.ru", "", "Poco3",
-                LocalDate.of(1993, 10, 6));
-        user4 = new User(1, "salvador@t.ru", "chico and son", "Poco4",
-                LocalDate.of(1994, 10, 6));
-        user5 = new User(1, "salvador@t.ru5", "chico5", "",
-                LocalDate.of(1995, 10, 6));
-        user6 = new User(1, "salvador@t.ru6", "chico6", "Poco6",
-                LocalDate.now().minusDays(1));
-        user7 = new User(1, "salvador@t.ru7", "chico7", "Poco7",
-                LocalDate.now());
-        user8 = new User(1, "salvador@t.ru8", "chico8", "Poco8",
-                LocalDate.now().plusDays(1));
+        user = User.builder()
+                .id(1)
+                .email("salvador@mail.ru")
+                .login("chico")
+                .name("Poco")
+                .birthday(LocalDate.of(1990, 10, 6))
+                .build();
+        user1 = User.builder()
+                .id(1)
+                .email("")
+                .login("chico1")
+                .name("Poco1")
+                .birthday(LocalDate.of(1991, 10, 6))
+                .build();
+        user2 = User.builder()
+                .id(1)
+                .email("salvador.ru")
+                .login("chico2")
+                .name("Poco2")
+                .birthday(LocalDate.of(1992, 10, 6))
+                .build();
+        user3 = User.builder()
+                .id(1)
+                .email("salvador@t.ru")
+                .login("")
+                .name("Poco3")
+                .birthday(LocalDate.of(1993, 10, 6))
+                .build();
+        user4 = User.builder()
+                .id(1)
+                .email("salvador@t.ru")
+                .login("chico and son")
+                .name("Poco4")
+                .birthday(LocalDate.of(1994, 10, 6))
+                .build();
+        user5 = User.builder()
+                .id(1)
+                .email("salvador@t.ru5")
+                .login("chico5")
+                .name("")
+                .birthday(LocalDate.of(1995, 10, 6))
+                .build();
+        user6 = User.builder()
+                .id(1)
+                .email("salvador@t.ru6")
+                .login("chico6")
+                .name("Poco6")
+                .birthday(LocalDate.now().minusDays(1))
+                .build();
+        user7 = User.builder()
+                .id(1)
+                .email("salvador@t.ru7")
+                .login("chico7")
+                .name("Poco7")
+                .birthday(LocalDate.now())
+                .build();
+        user8 = User.builder()
+                .id(1)
+                .email("salvador@t.ru8")
+                .login("chico8")
+                .name("Poco8")
+                .birthday(LocalDate.now().plusDays(1))
+                .build();
     }
 
     @Test
@@ -122,12 +167,12 @@ class UserControllerTest {
         controller.add(user);
         assertEquals(1, controller.getUsers().size(), "Хранилище не должно быть пустым.");
         assertTrue(controller.getUsers().contains(user), "Фильм не добавлен в хранилище.");
-        controller.update(user6);
+        User result = controller.update(user6);
         assertEquals(1, controller.getUsers().size(), "Хранилище не должно быть пустым.");
-        assertEquals(user.getEmail(), user6.getEmail(), "Адреса email не совпадают.");
-        assertEquals(user.getLogin(), user6.getLogin(), "Логины не совпадают.");
-        assertEquals(user.getName(), user6.getName(), "Имена не совпадают.");
-        assertEquals(user.getBirthday(), user6.getBirthday(), "Даты рождения не совпадают.");
+        assertEquals(result.getEmail(), user6.getEmail(), "Адреса email не совпадают.");
+        assertEquals(result.getLogin(), user6.getLogin(), "Логины не совпадают.");
+        assertEquals(result.getName(), user6.getName(), "Имена не совпадают.");
+        assertEquals(result.getBirthday(), user6.getBirthday(), "Даты рождения не совпадают.");
     }
 
     @Test
@@ -176,38 +221,33 @@ class UserControllerTest {
     void shouldUpdateUserWhenNameIsEmpty() {
         controller.add(user);
         assertTrue(controller.getUsers().contains(user), "Пользователь не добавлен в хранилище.");
-        controller.update(user5);
-        assertEquals(user.getLogin(), user.getName(), "Логин и имя различны.");
-        assertEquals(user.getEmail(), user5.getEmail(), "Адреса email не совпадают.");
-        assertEquals(user.getLogin(), user5.getLogin(), "Логины не совпадают.");
-
-
-        assertEquals(user.getName(), user5.getName(), "Имена не совпадают.");
-        assertEquals(user.getBirthday(), user5.getBirthday(), "Даты рождения не совпадают.");
+        User result = controller.update(user5);
+        assertEquals(result.getEmail(), user5.getEmail(), "Адреса email не совпадают.");
+        assertEquals(result.getLogin(), user5.getLogin(), "Логины не совпадают.");
+        assertEquals(result.getName(), user5.getName(), "Имена не совпадают.");
+        assertEquals(result.getBirthday(), user5.getBirthday(), "Даты рождения не совпадают.");
     }
 
     @Test
     void shouldUpdateUserWhenBirthdayIsBeforeNow() {
         controller.add(user);
         assertTrue(controller.getUsers().contains(user), "Пользователь не добавлен в хранилище.");
-        controller.update(user6);
-        assertEquals(user.getEmail(), user6.getEmail(), "Адреса email не совпадают.");
-        assertEquals(user.getLogin(), user6.getLogin(), "Логины не совпадают.");
-        assertEquals(user.getName(), user6.getName(), "Имена не совпадают.");
-
-
-        assertEquals(user.getBirthday(), user6.getBirthday(), "Даты рождения не совпадают.");
+        User result = controller.update(user6);
+        assertEquals(result.getEmail(), user6.getEmail(), "Адреса email не совпадают.");
+        assertEquals(result.getLogin(), user6.getLogin(), "Логины не совпадают.");
+        assertEquals(result.getName(), user6.getName(), "Имена не совпадают.");
+        assertEquals(result.getBirthday(), user6.getBirthday(), "Даты рождения не совпадают.");
     }
 
     @Test
     void shouldUpdateUserWhenBirthdayIsEqualsNow() {
         controller.add(user);
         assertTrue(controller.getUsers().contains(user), "Пользователь не добавлен в хранилище.");
-        controller.update(user7);
-        assertEquals(user.getEmail(), user7.getEmail(), "Адреса email не совпадают.");
-        assertEquals(user.getLogin(), user7.getLogin(), "Логины не совпадают.");
-        assertEquals(user.getName(), user7.getName(), "Имена не совпадают.");
-        assertEquals(user.getBirthday(), user7.getBirthday(), "Даты рождения не совпадают.");
+        User result = controller.update(user7);
+        assertEquals(result.getEmail(), user7.getEmail(), "Адреса email не совпадают.");
+        assertEquals(result.getLogin(), user7.getLogin(), "Логины не совпадают.");
+        assertEquals(result.getName(), user7.getName(), "Имена не совпадают.");
+        assertEquals(result.getBirthday(), user7.getBirthday(), "Даты рождения не совпадают.");
     }
 
     @Test

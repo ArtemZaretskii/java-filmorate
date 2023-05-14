@@ -10,9 +10,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -47,9 +45,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Map<Integer, Film> getFilms() {
+    public List<Film> getFilms() {
         log.info("Выполнен запрос на получение списка фильмов");
-        return films;
+        return new ArrayList<>(films.values());
     }
 
     @Override
@@ -101,9 +99,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getTop10Films(int count) {
+    public Collection<Film> getPopularFilms(int count) {
         log.info("Выполнен запрос на получение топ 10 фильмов");
-        return getFilms().values().stream().sorted((i0, i1) -> {
+        return films.values().stream().sorted((i0, i1) -> {
             int comp = Integer.compare(i0.getLikes().size(), i1.getLikes().size());
             return comp * -1;
         }).limit(count).collect(Collectors.toList());

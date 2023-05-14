@@ -10,6 +10,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,15 +25,19 @@ class UserDbStorageTest {
 
     @BeforeEach
     public void createUserForTests() {
-        user = new User("salvador@mail.ru", "chico", "Poco",
-                LocalDate.of(1990, 10, 6));
+        user = User.builder()
+                .email("salvador@mail.ru")
+                .login("chico")
+                .name("Poco")
+                .birthday(LocalDate.of(1990, 10, 6))
+                .build();
     }
 
     @Test
     void shouldReturnUserWhenDbHasUser() {
-        Map<Integer, User> users = userDbStorage.getUsers();
+        List<User> users = userDbStorage.getUsers();
         assertThat(users).hasSize(1);
-        User testUser = users.get(1);
+        User testUser = users.get(0);
         assertThat(testUser.getEmail()).isEqualTo("mail");
         assertThat(testUser.getLogin()).isEqualTo("login");
         assertThat(testUser.getName()).isEqualTo("name");
@@ -42,8 +47,8 @@ class UserDbStorageTest {
     @Test
     void shouldAddUser() {
         userDbStorage.add(user);
-        Map<Integer, User> users = userDbStorage.getUsers();
-        User testUser = users.get(2);
+        List<User> users = userDbStorage.getUsers();
+        User testUser = users.get(1);
         assertThat(testUser.getEmail()).isEqualTo(user.getEmail());
         assertThat(testUser.getLogin()).isEqualTo(user.getLogin());
         assertThat(testUser.getName()).isEqualTo(user.getName());
@@ -52,16 +57,22 @@ class UserDbStorageTest {
 
     @Test
     void shouldUpdateUser() {
-        User updateUser = new User(1, "updateEmail", "updateLogin", "updateName",
-                LocalDate.of(2000, 01, 01));
+        User updateUser = User.builder()
+                .id(1)
+                .email("updateEmail")
+                .login("updateLogin")
+                .name("updateName")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
         userDbStorage.update(updateUser);
-        User returnedUser = userDbStorage.getUsers().get(1);
+        User returnedUser = userDbStorage.getUsers().get(0);
         assertThat(returnedUser).isEqualTo(updateUser);
     }
 
     @Test
     void shouldRemoveUser() {
-        assertThat(userDbStorage.getUsers().get(1).getId()).isEqualTo(1);
+        assertThat(userDbStorage.getUsers().get(0).getId()).isEqualTo(1);
         assertThat(userDbStorage.getUsers()).hasSize(1);
         userDbStorage.deleteUser(1);
         assertThat(userDbStorage.getUsers()).isEmpty();
@@ -69,7 +80,14 @@ class UserDbStorageTest {
 
     @Test
     void shouldReturnUserById() {
-        assertThat(userDbStorage.getUserById(1)).isEqualTo(new User(1,"mail", "login", "name",
-                LocalDate.of(1990, 03, 8)));
+        User expectedUser = User.builder()
+                .id(1)
+                .name("name")
+                .email("mail")
+                .login("login")
+                .birthday(LocalDate.of(1990, 3, 8))
+                .build();
+
+        assertThat(userDbStorage.getUserById(1)).isEqualTo(expectedUser);
     }
 }

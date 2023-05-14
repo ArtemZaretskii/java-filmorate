@@ -34,9 +34,9 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Map<Integer, User> getUsers() {
+    public List<User> getUsers() {
         log.info("Выполнен запрос на получение списка пользователей");
-        return users;
+        return new ArrayList<>(users.values());
     }
 
     @Override
@@ -56,7 +56,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User addFriend(int id, int friendId) {
+    public void addFriend(int id, int friendId) {
         if (!users.containsKey(id)) {
             logAndMessageObjectNotFoundException("Пользователь не найден");
         }
@@ -68,11 +68,10 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("Создана зависимость 'Друзья' между пользователями {} и {}",
                 users.get(id).getName(),
                 users.get(friendId).getName());
-        return getUserById(friendId);
     }
 
     @Override
-    public Integer deleteFriend(int id, int friendId) {
+    public void deleteFriend(int id, int friendId) {
         if (!users.containsKey(id)) {
             logAndMessageObjectNotFoundException("Пользователь 1 не найден");
         }
@@ -84,7 +83,6 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("Удалена зависимость 'Друзья' между пользователями {} и {}",
                 users.get(id).getName(),
                 users.get(friendId).getName());
-        return null;
     }
 
     @Override

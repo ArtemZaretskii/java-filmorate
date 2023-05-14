@@ -1,31 +1,26 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.GenreDao;
-import ru.yandex.practicum.filmorate.exceptions.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.TypeOfGenre;
 
-import java.util.Collection;
+import java.util.List;
 
+@Slf4j
+@RequiredArgsConstructor
 @Service
 public class GenreService {
-    private GenreDao genreDao;
-
-    @Autowired
-    public GenreService(GenreDao genreDao) {
-        this.genreDao = genreDao;
-    }
+    private final GenreDao genreDao;
 
     public Genre getGenreById(Integer id) {
-        if (id > TypeOfGenre.values().length - 1 || id < 1) {
-            throw new ObjectNotFoundException(String.format("id %d", id));
-        }
-        return genreDao.getGenreById(id);
+        log.info("Запрос жанра с id='{}'", id);
+        return genreDao.findById(id);
     }
 
-    public Collection<Genre> getGenres() {
-        return genreDao.getGenres();
+    public List<Genre> getAllGenres() {
+        log.info("Запрос всех жанров");
+        return genreDao.findAll();
     }
 }
