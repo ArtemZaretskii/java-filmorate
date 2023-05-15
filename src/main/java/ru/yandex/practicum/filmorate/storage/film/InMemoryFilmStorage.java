@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -9,10 +10,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -23,7 +21,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     private int id = 1;
 
     @Autowired
-    public InMemoryFilmStorage(UserStorage userStorage) {
+    public InMemoryFilmStorage(@Qualifier("inMemoryUserStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
@@ -62,7 +60,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void addLike(int filmId, int userId) {
+    public Integer deleteFilm(Integer id) {
+        films.remove(id);
+        log.info("Удален фильм {}.", id);
+        return id;
+    }
+
+    @Override
+    public Integer addLike(int filmId, int userId) {
         if (!films.containsKey(filmId)) {
             logAndMessageObjectNotFoundException("Фильм не найден");
         }
@@ -74,10 +79,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         log.info("Пользователь {} поставил лайк фильму {}",
                 user.getName(),
                 films.get(filmId).getName());
+        return userId;
     }
 
     @Override
-    public void deleteLike(int filmId, int userId) {
+    public Integer deleteLike(int filmId, int userId) {
         if (!films.containsKey(filmId)) {
             logAndMessageObjectNotFoundException("Фильм не найден");
         }
@@ -89,12 +95,13 @@ public class InMemoryFilmStorage implements FilmStorage {
         log.info("Пользователь {} удалил лайк фильму {}",
                 user.getName(),
                 films.get(filmId).getName());
+        return userId;
     }
 
     @Override
-    public List<Film> getTop10Films(int count) {
+    public Collection<Film> getPopularFilms(int count) {
         log.info("Выполнен запрос на получение топ 10 фильмов");
-        return getFilms().stream().sorted((i0, i1) -> {
+        return films.values().stream().sorted((i0, i1) -> {
             int comp = Integer.compare(i0.getLikes().size(), i1.getLikes().size());
             return comp * -1;
         }).limit(count).collect(Collectors.toList());

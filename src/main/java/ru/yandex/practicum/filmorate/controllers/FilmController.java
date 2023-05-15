@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.util.List;
+import java.util.Collection;
 
 @RequestMapping("/films")
 @RestController
@@ -27,8 +27,13 @@ public class FilmController {
     }
 
     @GetMapping
-    public List<Film> getFilms() {
+    public Collection<Film> getFilms() {
         return filmService.getFilms();
+    }
+
+    @DeleteMapping("/{id}")
+    public Integer deleteFilm(@PathVariable int id) {
+        return filmService.deleteFilm(id);
     }
 
     @GetMapping("/{id}")
@@ -37,18 +42,18 @@ public class FilmController {
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    public void addLike(@PathVariable int filmId, @PathVariable int userId) {
-        filmService.addLike(filmId, userId);
+    public Integer addLike(@PathVariable int filmId, @PathVariable int userId) {
+        return filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    public void deleteLike(@PathVariable int filmId, @PathVariable int userId) {
-        filmService.deleteLike(filmId, userId);
+    public Integer deleteLike(@PathVariable int filmId, @PathVariable int userId) {
+        return filmService.deleteLike(filmId, userId);
     }
 
     @GetMapping("/popular")
-    public List<Film> getTop10Films(@RequestParam(value = "count", defaultValue = "10", required = false) int count) {
-        return filmService.getTop10Films(count);
+    public Collection<Film> getTop10Films(@RequestParam(value = "count", defaultValue = "10", required = false) int count) {
+        return filmService.getPopularFilms(count);
     }
 }
 
